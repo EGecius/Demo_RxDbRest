@@ -18,7 +18,6 @@
 package com.whiterabbit.rxrestsample.data;
 
 import android.app.Application;
-import android.util.Log;
 
 import com.whiterabbit.rxrestsample.rest.GitHubClient;
 
@@ -27,6 +26,7 @@ import java.util.List;
 import javax.inject.Inject;
 
 import rx.Observable;
+import rx.Subscriber;
 import rx.schedulers.Schedulers;
 import rx.subjects.BehaviorSubject;
 
@@ -43,37 +43,49 @@ public class ObservableGithubRepos {
 
 	// TODO: 15/01/2016 rather than returning an underlying observable it should create one of its own, which in
 	// OnSusbcribe will check whether it is time to update DB and wll do that
-	/** Returns Observable which will emit contents of Database & any of its updates */
-    public Observable<List<Repo>> getDbObservable() {
-        Log.v("Eg:ObservableGithubRepos:48", "getDbObservable");
-        Observable<List<Repo>> updateObservable = Observable.create(subscriber -> {
-            scheduleUpdateIfNeeded();
-            subscriber.onCompleted();
-        });
-
+	/** Returns Observable which will emit contents of Database & any of its updates. It will schedule update if
+     * needed */
+    public Observable<List<Repo>> getObservable() {
+        Observable<List<Repo>> updateObservable = Observable.create(subscriber -> onSubsribe(subscriber));
         return updateObservable.concatWith(mDatabase.getObservable());
     }
 
-    private void scheduleUpdateIfNeeded() {
-        Log.i("Eg:ObservableGithubRepos:53", "scheduleUpdateIfNeeded");
+    private void onSubsribe(Subscriber<? super List<Repo>> subscriber) {
+        if (isDataInvalid()) {
+			mDatabase.clearDb();
+			scheduleUpdateIfNeeded();
+		}
+        subscriber.onCompleted();
+    }
 
-        updateRepo("fedepaol");
+    private void scheduleUpdateIfNeeded() {
+        if (isDataInvalid()) {
+            updateSoftly("fedepaol");
+        }
+    }
+
+    public Observable<String> updateSoftly(String userName) {
+        if (isDataInvalid()) {
+            return updateRepoInternal(userName);
+        } else {
+            return Observable.create(subscriber -> subscriber.onCompleted());
+        }
+    }
+
+    /** Whether our cashed data is out of date & should be re-fetched */
+    private boolean isDataInvalid() {
+        return true;
     }
 
     /** Returns Observable informing about progress of an update.
 	 * In case of success it 1) updates DB 2) Returns name of username, whose repo was updated */
-    public Observable<String> updateRepo(String userName) {
-        Log.d("Eg:ObservableGithubRepos:66", "updateRepo");
+    private Observable<String> updateRepoInternal(String userName) {
         BehaviorSubject<String> requestSubject = BehaviorSubject.create();
 
         Observable<List<Repo>> observable = mClient.getRepos(userName);
         observable.subscribeOn(Schedulers.io())
                   .observeOn(Schedulers.io())
                   .subscribe(l -> {
-
-
-                          Log.w("Eg:ObservableGithubRepos:75", "updateRepo inserting into db size " + l.size());
-
                                     mDatabase.insertRepoList(l);
                                     requestSubject.onNext(userName);},
                              e -> requestSubject.onError(e),

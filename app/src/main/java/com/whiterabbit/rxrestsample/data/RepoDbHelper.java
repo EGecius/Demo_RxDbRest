@@ -123,7 +123,7 @@ class RepoDbHelper {
         return mDb.delete(REPO_TABLE, ROW_ID + " = " + rowIndex, null) > 0;
     }
 
-    public boolean removeAllRepo(){
+    public boolean removeAllRepo() {
         return mDb.delete(REPO_TABLE, null, null) > 0;
     }
 

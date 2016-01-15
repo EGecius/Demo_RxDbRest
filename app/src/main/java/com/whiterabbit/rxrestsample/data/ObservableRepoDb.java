@@ -91,4 +91,10 @@ class ObservableRepoDb {
         mUpdatesSubject.onNext(result);
     }
 
+    /** Removes all repos from db */
+    void clearDb() {
+        mDbHelper.open();
+        mDbHelper.removeAllRepo();
+    }
+
 }
