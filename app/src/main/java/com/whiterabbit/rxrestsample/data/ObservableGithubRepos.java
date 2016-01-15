@@ -32,17 +32,16 @@ import rx.subjects.BehaviorSubject;
 /** Allows fetching repos from DB and from server */
 public class ObservableGithubRepos {
 
-    @Inject
-    GitHubClient mClient;
-    @Inject
-    ObservableRepoDb mDatabase;
-    @Inject
-    Application mApplication;
+    @Inject GitHubClient mClient;
+    @Inject ObservableRepoDb mDatabase;
+    @Inject Application mApplication;
 
     @Inject
     public ObservableGithubRepos() {
     }
 
+	// TODO: 15/01/2016 rather than returning an underlying observable it should create one of its own, which in
+	// OnSusbcribe will check whether it is time to update DB and wll do that
 	/** Returns Observable which will emit contents of Database & any of its updates */
     public Observable<List<Repo>> getDbObservable() {
         return mDatabase.getObservable();
@@ -61,6 +60,7 @@ public class ObservableGithubRepos {
                                     requestSubject.onNext(userName);},
                              e -> requestSubject.onError(e),
                              () -> requestSubject.onCompleted());
+
         return requestSubject.asObservable();
     }
 
