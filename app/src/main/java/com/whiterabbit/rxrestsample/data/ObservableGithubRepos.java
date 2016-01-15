@@ -29,6 +29,7 @@ import rx.Observable;
 import rx.schedulers.Schedulers;
 import rx.subjects.BehaviorSubject;
 
+/** Allows fetching repos from DB and from server */
 public class ObservableGithubRepos {
 
     @Inject

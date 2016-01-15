@@ -43,8 +43,8 @@ import rx.schedulers.Schedulers;
 
 public class CachedActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
 
-    @Inject
-    ObservableGithubRepos mRepo;
+	/** Allows fetching repos from DB and from server */
+    @Inject ObservableGithubRepos mReposProvider;
 
     @Bind(R.id.cached_list) RecyclerView mList;
     @Bind(R.id.activity_cached_swipe) SwipeRefreshLayout mSwipeLayout;
@@ -80,7 +80,7 @@ public class CachedActivity extends AppCompatActivity implements SwipeRefreshLay
 	}
 
 	private void setupDbObservable() {
-		mDbObservable = mRepo.getDbObservable();
+		mDbObservable = mReposProvider.getDbObservable();
 		mDbObservable.unsubscribeOn(Schedulers.computation()); // because of this https://github.com/square/retrofit/issues/1046
 	}
 
@@ -102,7 +102,7 @@ public class CachedActivity extends AppCompatActivity implements SwipeRefreshLay
 	}
 
 	private void fetchUpdates() {
-		Observable<String> progressObservable = mRepo.updateRepo("fedepaol");
+		Observable<String> progressObservable = mReposProvider.updateRepo("fedepaol");
 		mUpdatesSubscription = progressObservable.subscribeOn(Schedulers.io())
 				.observeOn(AndroidSchedulers.mainThread())
 				.subscribe(s -> {},
