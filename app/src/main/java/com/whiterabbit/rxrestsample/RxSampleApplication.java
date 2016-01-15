@@ -21,7 +21,7 @@ import android.app.Application;
 
 import com.whiterabbit.rxrestsample.inject.DaggerInjectComponent;
 import com.whiterabbit.rxrestsample.inject.InjectComponent;
-import com.whiterabbit.rxrestsample.inject.InjectModule;
+import com.whiterabbit.rxrestsample.data.InjectModule;
 
 public class RxSampleApplication extends Application {
     private InjectComponent mComponent;

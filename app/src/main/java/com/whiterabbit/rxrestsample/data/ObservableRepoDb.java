@@ -24,10 +24,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import rx.Observable;
-import rx.Subscriber;
 import rx.subjects.PublishSubject;
 
-public class ObservableRepoDb {
+class ObservableRepoDb {
     private PublishSubject<List<Repo>> mSubject = PublishSubject.create();
     private RepoDbHelper mDbHelper;
 

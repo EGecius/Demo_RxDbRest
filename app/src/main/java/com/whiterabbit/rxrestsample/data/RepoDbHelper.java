@@ -30,7 +30,7 @@ import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.util.Log;
 
 
-public class RepoDbHelper {
+class RepoDbHelper {
     private static final String TAG = "DbHelper";
 
     private static final String DATABASE_NAME = "DbHelper.db";

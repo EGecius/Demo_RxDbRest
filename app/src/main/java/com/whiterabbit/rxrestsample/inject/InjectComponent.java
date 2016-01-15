@@ -18,6 +18,7 @@
 package com.whiterabbit.rxrestsample.inject;
 
 import com.whiterabbit.rxrestsample.CachedActivity;
+import com.whiterabbit.rxrestsample.data.InjectModule;
 import com.whiterabbit.rxrestsample.data.ObservableGithubRepos;
 import com.whiterabbit.rxrestsample.NonCachedActivity;
 

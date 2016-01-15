@@ -15,11 +15,10 @@
  *
  */
 
-package com.whiterabbit.rxrestsample.inject;
+package com.whiterabbit.rxrestsample.data;
 
 import android.app.Application;
 
-import com.whiterabbit.rxrestsample.data.ObservableRepoDb;
 import com.whiterabbit.rxrestsample.rest.GitHubClient;
 
 import javax.inject.Singleton;
