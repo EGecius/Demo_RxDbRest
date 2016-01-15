@@ -59,7 +59,7 @@ class ObservableRepoDb {
         return repos;
     }
 
-    public void insertRepoList(List<Repo> repos) {
+	void insertRepoList(List<Repo> repos) {
         // This could have been done inside a transaction + yieldIfContendedSafely
         mDbHelper.open();
         mDbHelper.removeAllRepo();
@@ -73,7 +73,7 @@ class ObservableRepoDb {
         mSubject.onNext(repos);
     }
 
-    public void insertRepo(Repo r) {
+	void insertRepo(Repo r) {
         mDbHelper.open();
         mDbHelper.addRepo(r.getId(),
                 r.getName(),
