@@ -48,10 +48,11 @@ public class CachedActivity extends AppCompatActivity implements SwipeRefreshLay
     @Bind(R.id.cached_list) RecyclerView mList;
     @Bind(R.id.activity_cached_swipe) SwipeRefreshLayout mSwipeLayout;
 
-    private Observable<List<Repo>> mObservable;
+	/** Emits contents of DB and its updates */
+    private Observable<List<Repo>> mDbObservable;
     private RepoAdapter mAdapter;
-    private Subscription mDiskSubscription;
-    private Subscription mProgressSubscription;
+    private Subscription mDbSubscription;
+    private Subscription mUpdateSubscription;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -63,8 +64,8 @@ public class CachedActivity extends AppCompatActivity implements SwipeRefreshLay
         LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
         mList.setLayoutManager(layoutManager);
         mSwipeLayout.setOnRefreshListener(this);
-        mObservable = mRepo.getDbObservable();
-        mObservable.unsubscribeOn(Schedulers.computation()); // because of this https://github.com/square/retrofit/issues/1046
+        mDbObservable = mRepo.getDbObservable();
+        mDbObservable.unsubscribeOn(Schedulers.computation()); // because of this https://github.com/square/retrofit/issues/1046
 
         mAdapter = new RepoAdapter();
         mList.setAdapter(mAdapter);
@@ -72,7 +73,7 @@ public class CachedActivity extends AppCompatActivity implements SwipeRefreshLay
 
     private void fetchUpdates() {
         Observable<String> progressObservable = mRepo.updateRepo("fedepaol");
-        mProgressSubscription = progressObservable.subscribeOn(Schedulers.io())
+        mUpdateSubscription = progressObservable.subscribeOn(Schedulers.io())
                            .observeOn(AndroidSchedulers.mainThread())
                            .subscribe(s -> {},
                                       e -> { Log.d("RX", "There has been an error");
@@ -84,28 +85,26 @@ public class CachedActivity extends AppCompatActivity implements SwipeRefreshLay
     @Override
     protected void onResume() {
         super.onResume();
-        mDiskSubscription = mObservable.subscribeOn(Schedulers.io())
-                   .observeOn(AndroidSchedulers.mainThread()).subscribe(l -> {
+        mDbSubscription = mDbObservable
+				.subscribeOn(Schedulers.io())
+				.observeOn(AndroidSchedulers.mainThread()).subscribe(l -> {
                     mAdapter.updateData(l);
 
-                    Toast toast = Toast.makeText(this, "Updated!", Toast.LENGTH_SHORT);
-                    toast.show();
+                    Toast.makeText(this, "Updated!", Toast.LENGTH_SHORT).show();
                 });
 
         fetchUpdates();
-        Toast toast = Toast.makeText(this, "Updating..", Toast.LENGTH_SHORT);
-        toast.show();
+        Toast.makeText(this, "Updating..", Toast.LENGTH_SHORT).show();
     }
-
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (mDiskSubscription != null) {
-            mDiskSubscription.unsubscribe();
+        if (mDbSubscription != null) {
+            mDbSubscription.unsubscribe();
         }
-        if (mProgressSubscription != null) {
-            mProgressSubscription.unsubscribe();
+        if (mUpdateSubscription != null) {
+            mUpdateSubscription.unsubscribe();
         }
     }
 
@@ -113,4 +112,5 @@ public class CachedActivity extends AppCompatActivity implements SwipeRefreshLay
     public void onRefresh() {
         fetchUpdates();
     }
+
 }

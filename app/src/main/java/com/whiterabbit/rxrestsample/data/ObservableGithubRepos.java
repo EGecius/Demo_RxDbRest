@@ -30,6 +30,7 @@ import rx.schedulers.Schedulers;
 import rx.subjects.BehaviorSubject;
 
 public class ObservableGithubRepos {
+
     @Inject
     GitHubClient mClient;
     @Inject
@@ -41,10 +42,13 @@ public class ObservableGithubRepos {
     public ObservableGithubRepos() {
     }
 
+	/** Returns Observable which will emit contents of Database & any of its updates */
     public Observable<List<Repo>> getDbObservable() {
         return mDatabase.getObservable();
     }
 
+	/** Returns Observable informing about progress of an update.
+	 * In case of success it 1) updates DB 2) Returns name of username, whose repo was updated */
     public Observable<String> updateRepo(String userName) {
         BehaviorSubject<String> requestSubject = BehaviorSubject.create();
 
@@ -58,4 +62,5 @@ public class ObservableGithubRepos {
                              () -> requestSubject.onCompleted());
         return requestSubject.asObservable();
     }
+
 }
