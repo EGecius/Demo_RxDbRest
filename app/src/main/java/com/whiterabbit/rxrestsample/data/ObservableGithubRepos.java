@@ -53,15 +53,9 @@ public class ObservableGithubRepos {
     private void onSubsribe(Subscriber<? super List<Repo>> subscriber) {
         if (isDataInvalid()) {
 			mDatabase.clearDb();
-			scheduleUpdateIfNeeded();
+			updateRepoInternal("fedepaol");
 		}
         subscriber.onCompleted();
-    }
-
-    private void scheduleUpdateIfNeeded() {
-        if (isDataInvalid()) {
-            updateSoftly("fedepaol");
-        }
     }
 
     public Observable<String> updateSoftly(String userName) {
