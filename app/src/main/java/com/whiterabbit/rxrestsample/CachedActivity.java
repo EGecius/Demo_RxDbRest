@@ -52,63 +52,83 @@ public class CachedActivity extends AppCompatActivity implements SwipeRefreshLay
     private Observable<List<Repo>> mDbObservable;
     private RepoAdapter mAdapter;
     private Subscription mDbSubscription;
-    private Subscription mUpdateSubscription;
+    private Subscription mUpdatesSubscription;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        setContentView(R.layout.activity_main_cached);
-        ButterKnife.bind(this);
-        ((RxSampleApplication) getApplication()).getComponent().inject(this);
 
-        LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
-        mList.setLayoutManager(layoutManager);
-        mSwipeLayout.setOnRefreshListener(this);
-        mDbObservable = mRepo.getDbObservable();
-        mDbObservable.unsubscribeOn(Schedulers.computation()); // because of this https://github.com/square/retrofit/issues/1046
-
-        mAdapter = new RepoAdapter();
-        mList.setAdapter(mAdapter);
+		injectDependencies();
+		setupUI();
+		setupDbObservable();
     }
 
-    private void fetchUpdates() {
-        Observable<String> progressObservable = mRepo.updateRepo("fedepaol");
-        mUpdateSubscription = progressObservable.subscribeOn(Schedulers.io())
-                           .observeOn(AndroidSchedulers.mainThread())
-                           .subscribe(s -> {},
-                                      e -> { Log.d("RX", "There has been an error");
-                                            mSwipeLayout.setRefreshing(false);
-                                      },
-                                      () -> mSwipeLayout.setRefreshing(false));
-    }
+	private void injectDependencies() {
+		((RxSampleApplication) getApplication()).getComponent().inject(this);
+	}
 
-    @Override
+	private void setupUI() {
+		setContentView(R.layout.activity_main_cached);
+		ButterKnife.bind(this);
+
+		LinearLayoutManager layoutManager = new LinearLayoutManager(getApplicationContext());
+		mList.setLayoutManager(layoutManager);
+		mSwipeLayout.setOnRefreshListener(this);
+		mAdapter = new RepoAdapter();
+		mList.setAdapter(mAdapter);
+	}
+
+	private void setupDbObservable() {
+		mDbObservable = mRepo.getDbObservable();
+		mDbObservable.unsubscribeOn(Schedulers.computation()); // because of this https://github.com/square/retrofit/issues/1046
+	}
+
+	@Override
     protected void onResume() {
         super.onResume();
-        mDbSubscription = mDbObservable
+		populateAdapterFromDb();
+		fetchUpdates();
+    }
+
+	private void populateAdapterFromDb() {
+		mDbSubscription = mDbObservable
 				.subscribeOn(Schedulers.io())
 				.observeOn(AndroidSchedulers.mainThread()).subscribe(l -> {
-                    mAdapter.updateData(l);
+					mAdapter.updateData(l);
 
-                    Toast.makeText(this, "Updated!", Toast.LENGTH_SHORT).show();
-                });
+					Toast.makeText(this, "Updated!", Toast.LENGTH_SHORT).show();
+				});
+	}
 
-        fetchUpdates();
-        Toast.makeText(this, "Updating..", Toast.LENGTH_SHORT).show();
-    }
+	private void fetchUpdates() {
+		Observable<String> progressObservable = mRepo.updateRepo("fedepaol");
+		mUpdatesSubscription = progressObservable.subscribeOn(Schedulers.io())
+				.observeOn(AndroidSchedulers.mainThread())
+				.subscribe(s -> {},
+						e -> { Log.d("RX", "There has been an error");
+							mSwipeLayout.setRefreshing(false);
+						},
+						() -> mSwipeLayout.setRefreshing(false));
+
+		Toast.makeText(this, "Updating..", Toast.LENGTH_SHORT).show();
+	}
 
     @Override
     protected void onPause() {
         super.onPause();
-        if (mDbSubscription != null) {
-            mDbSubscription.unsubscribe();
-        }
-        if (mUpdateSubscription != null) {
-            mUpdateSubscription.unsubscribe();
-        }
+		unsubscribe();
     }
 
-    @Override
+	private void unsubscribe() {
+		if (mDbSubscription != null && !mDbSubscription.isUnsubscribed()) {
+			mDbSubscription.unsubscribe();
+		}
+		if (mUpdatesSubscription != null && !mUpdatesSubscription.isUnsubscribed()) {
+			mUpdatesSubscription.unsubscribe();
+		}
+	}
+
+	@Override
     public void onRefresh() {
         fetchUpdates();
     }
