@@ -34,7 +34,7 @@ import rx.subjects.BehaviorSubject;
 public class ObservableGithubRepos {
 
     @Inject GitHubClient mClient;
-    @Inject ObservableRepoDb mDatabase;
+    @Inject ObservableDb mDatabase;
     @Inject Application mApplication;
 
     @Inject

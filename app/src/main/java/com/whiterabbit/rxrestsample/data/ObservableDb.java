@@ -27,7 +27,8 @@ import java.util.List;
 import rx.Observable;
 import rx.subjects.PublishSubject;
 
-class ObservableRepoDb {
+/** Wraps our implementation of {@link RepoDbHelper} */
+class ObservableDb {
 
 	/** Will receive onNext calls on every update of DB */
     private PublishSubject<List<Repo>> mUpdatesSubject = PublishSubject.create();
@@ -35,7 +36,7 @@ class ObservableRepoDb {
 	/** Wrapper around our implementation of {@link SQLiteOpenHelper} */
     private RepoDbHelper mDbHelper;
 
-    public ObservableRepoDb(Context c) {
+    public ObservableDb(Context c) {
         mDbHelper = new RepoDbHelper(c);
     }
 

@@ -47,7 +47,7 @@ public class InjectModule {
     }
 
     @Provides
-    ObservableRepoDb provideRepoDbObservable() {
-        return new ObservableRepoDb(mApp.getApplicationContext());
+    ObservableDb provideRepoDbObservable() {
+        return new ObservableDb(mApp.getApplicationContext());
     }
 }
