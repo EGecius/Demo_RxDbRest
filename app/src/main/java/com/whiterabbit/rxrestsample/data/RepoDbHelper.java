@@ -29,8 +29,9 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.database.sqlite.SQLiteDatabase.CursorFactory;
 import android.util.Log;
 
-
+/** Wrapper around our implementation of {@link SQLiteOpenHelper} */
 class RepoDbHelper {
+
     private static final String TAG = "DbHelper";
 
     private static final String DATABASE_NAME = "DbHelper.db";
@@ -185,5 +186,6 @@ class RepoDbHelper {
             onCreate(db);
         }
     }
+
 }
 

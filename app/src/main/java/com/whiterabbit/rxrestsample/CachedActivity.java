@@ -42,6 +42,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.schedulers.Schedulers;
 
 public class CachedActivity extends AppCompatActivity implements SwipeRefreshLayout.OnRefreshListener {
+
     @Inject
     ObservableGithubRepos mRepo;
 

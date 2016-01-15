@@ -19,6 +19,7 @@ package com.whiterabbit.rxrestsample.data;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteOpenHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -27,17 +28,21 @@ import rx.Observable;
 import rx.subjects.PublishSubject;
 
 class ObservableRepoDb {
-    private PublishSubject<List<Repo>> mSubject = PublishSubject.create();
+
+	/** Will receive onNext calls on every update of DB */
+    private PublishSubject<List<Repo>> mUpdatesSubject = PublishSubject.create();
+
+	/** Wrapper around our implementation of {@link SQLiteOpenHelper} */
     private RepoDbHelper mDbHelper;
 
     public ObservableRepoDb(Context c) {
         mDbHelper = new RepoDbHelper(c);
     }
 
+	/** Returns Observable which emits current contents of DB contents after every update of DB */
     public Observable<List<Repo>> getObservable() {
-        Observable<List<Repo>> firstTimeObservable =
-                Observable.fromCallable(this::getAllReposFromDb);
-        return firstTimeObservable.concatWith(mSubject);
+        Observable<List<Repo>> firstTimeObservable = Observable.fromCallable(this::getAllReposFromDb);
+        return firstTimeObservable.concatWith(mUpdatesSubject);
     }
 
     private List<Repo> getAllReposFromDb() {
@@ -70,7 +75,7 @@ class ObservableRepoDb {
                               r.getOwner().getLogin());
         }
         mDbHelper.close();
-        mSubject.onNext(repos);
+        mUpdatesSubject.onNext(repos);
     }
 
 	void insertRepo(Repo r) {
@@ -83,6 +88,7 @@ class ObservableRepoDb {
         mDbHelper.close();
 
         List<Repo> result = getAllReposFromDb();
-        mSubject.onNext(result);
+        mUpdatesSubject.onNext(result);
     }
+
 }
